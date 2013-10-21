@@ -40,6 +40,27 @@ class YiiElephantIOComponent extends CApplicationComponent {
 	}
 
 	/**
+	 * @param null $host
+	 * @param null $port
+	 *
+	 * @return \ElephantIO\Client
+	 */
+	public function createClient($host = null, $port = null) {
+		if (!isset($host)) {
+			$host = $this->host;
+		}
+		if (!isset($port)) {
+			$port = $this->port;
+		}
+		return new \ElephantIO\Client(
+			sprintf('http://%s:%s', $host, $port),
+			'socket.io',
+			1,
+			false
+		);
+	}
+
+	/**
 	 * @param string $path namespace on nodejs socket.io server
 	 * @param string $event event name in current namespace
 	 * @param mixed  $data event data
@@ -47,12 +68,7 @@ class YiiElephantIOComponent extends CApplicationComponent {
 	 *
 	 */
 	public function emit($path, $event, $data) {
-		$elephant = new \ElephantIO\Client(
-			'http://' . $this->ip . ':' . $this->port,
-			'socket.io',
-			1,
-			false
-		);
+		$elephant = $this->createClient();
 		$elephant->setHandshakeTimeout($this->handshakeTimeout);
 		$elephant->init();
 		$args = func_get_args();
